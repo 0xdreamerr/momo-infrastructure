@@ -1,0 +1,6 @@
+---
+# tasks file for kube-network
+- name: Apply Calico network
+  shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  become: true
+

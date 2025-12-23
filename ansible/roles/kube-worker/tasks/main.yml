@@ -1,0 +1,12 @@
+---
+# tasks file for kube-worker
+
+- name: Get join command
+  delegate_to: kube-master
+  command: kubeadm token create --print-join-command
+  register: join_cmd
+
+- name: Join cluster
+  command: "{{ join_cmd.stdout }}"
+  args:
+    creates: /etc/kubernetes/kubelet.conf

@@ -1,0 +1,33 @@
+---
+# tasks file for kube-master
+- name: Initialize Kubernetes cluster
+  command: >
+    kubeadm init
+    --pod-network-cidr=10.244.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Create kube config dir
+  file:
+    path: /root/.kube
+    state: directory
+
+- name: Copy admin.conf
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    remote_src: true
+
+- name: Create kube config dir
+  file:
+    path: /home/ubuntu/.kube
+    state: directory
+
+- name: Setup kubeconfig for ubuntu user
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+    remote_src: yes
