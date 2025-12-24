@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: gitlab.praktikum-services.ru:5050/std-int-009-04/momo-store/momo-frontend:1.0.2580673
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: docker-config-secret
