@@ -1,0 +1,14 @@
+---
+groups:
+  - name: Momo store rules
+    rules:
+    - alert: InstanceDown
+      expr: absent(up{job="kubernetes-pods", app="backend"})
+      for: 1m
+      labels:
+        severity: critical
+        project: "momo_store"
+        component: "Backend"
+      annotations:
+        summary: "Backend is down"
+        description: "Backend not available"
