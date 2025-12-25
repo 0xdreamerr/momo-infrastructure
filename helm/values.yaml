@@ -1,0 +1,15 @@
+backend:
+  replicas: 2
+  image: gitlab.praktikum-services.ru:5050/std-int-009-04/momo-store/momo-backend
+  rollingUpdate:
+    maxUnavailable: 1
+  port: 8081
+  servicePort: 8080
+  environment: "production"
+
+frontend:
+  replicas: 1
+  image: gitlab.praktikum-services.ru:5050/std-int-009-04/momo-store/momo-frontend
+  port: 80
+  servicePort: 80
+  environment: "production"
