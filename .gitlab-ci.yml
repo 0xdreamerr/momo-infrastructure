@@ -1,0 +1,34 @@
+stages:
+  - deploy
+
+variables:
+  HELM_RELEASE: momo-store
+  HELM_NAMESPACE: default
+  HELM_CHART: ./helm
+  HELM_CHART_BACKEND: ./helm/charts/backend
+  HELM_CHART_FRONTEND: ./helm/charts/frontend
+  IMAGE_TAG: ""
+  KUBECONFIG: "/tmp/kubeconfig"
+
+deploy:
+  stage: deploy
+  image: alpine/helm:3.12.0
+  before_script:
+    - mkdir -p $(dirname $KUBECONFIG)
+    - echo "$KUBE_CONFIG" | base64 -d > $KUBECONFIG
+    - chmod 600 $KUBECONFIG
+  script:
+    - |
+      if [ -z "$IMAGE_TAG" ]; then
+        echo "ERROR: IMAGE_TAG is not set"
+        exit 1
+      fi
+    - apk add --no-cache yq
+    - echo "Updating Chart version to IMAGE_TAG=$IMAGE_TAG"
+    - yq eval ".appVersion = \"$IMAGE_TAG\"" -i $HELM_CHART_BACKEND/Chart.yaml
+    - yq eval ".appVersion = \"$IMAGE_TAG\"" -i $HELM_CHART_FRONTEND/Chart.yaml
+    - yq eval ".version = \"$IMAGE_TAG\"" -i $HELM_CHART/Chart.yaml
+    - helm package $HELM_CHART --destination ./packages
+    - curl -u $NEXUS_USER:$NEXUS_PASS https://nexus.praktikum-services.tech/repository/std-int-009-04-helm/ --upload-file ./packages/$HELM_RELEASE-$IMAGE_TAG.tgz
+    - helm upgrade --install "$HELM_RELEASE" "$HELM_CHART" --namespace "$HELM_NAMESPACE" --version "$IMAGE_TAG"
+  when: manual
